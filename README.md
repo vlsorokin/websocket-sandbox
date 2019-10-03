@@ -1,0 +1,3 @@
+```
+mvn compile exec:java
+```
