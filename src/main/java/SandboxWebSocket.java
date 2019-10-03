@@ -24,14 +24,13 @@ public class SandboxWebSocket extends WebSocketAdapter {
     public void onWebSocketError(Throwable cause) {
         super.onWebSocketError(cause);
         System.out.println("ERROR: " + cause.toString());
-        cause.printStackTrace();
     }
 
     @Override
     public void onWebSocketText(String message) {
         try {
             super.onWebSocketText(message);
-            System.out.println("RECEIVED: " + message.length() + " characters: " + (message.length() > 20 ? message.substring(0, 20) + "..." : message));
+            System.out.println("RECEIVED: " + message.length() + " characters");
             if (session != null && session.isOpen()) {
                 session.getRemote().sendString("Text length is " + message.length());
                 session.getRemote().sendString("Text hash is " + message.hashCode());
