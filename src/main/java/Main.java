@@ -1,6 +1,10 @@
+import java.net.URL;
+import java.util.Objects;
+import org.eclipse.jetty.ee10.servlet.DefaultServlet;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class Main {
 
@@ -8,16 +12,15 @@ public class Main {
         int port = args.length > 0 ? Integer.parseInt(args[0]) : 8080;
         System.out.println("Starting Jetty server on port " + port);
 
-        Server server = new Server();
-        ServerConnector connector = new ServerConnector(server);
-        connector.setPort(port);
-        server.addConnector(connector);
+        Server server = new Server(port);
 
-        ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        handler.setContextPath("/");
-        server.setHandler(handler);
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.setContextPath("/");
+        server.setHandler(context);
 
-        handler.addServlet(SandboxWebSocketServlet.class, "/sandbox");
+        JettyWebSocketServletContainerInitializer.configure(context, null);
+        ServletHolder wsHolder = new ServletHolder("sandbox", new SandboxWebSocketServlet());
+        context.addServlet(wsHolder, "/sandbox");
 
         server.start();
         server.dump(System.err);
@@ -27,4 +30,3 @@ public class Main {
         server.join();
     }
 }
-

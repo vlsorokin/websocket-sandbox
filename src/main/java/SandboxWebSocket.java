@@ -1,42 +1,36 @@
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WebSocketAdapter;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
-import java.io.IOException;
-
-public class SandboxWebSocket extends WebSocketAdapter {
+@WebSocket
+public class SandboxWebSocket {
     private Session session;
 
-    @Override
-    public void onWebSocketConnect(Session session) {
-        super.onWebSocketConnect(session);
-        System.out.println("CONNECTED: " + session.getRemoteAddress().toString());
+    @OnWebSocketOpen
+    public void onWebSocketOpen(Session session) {
+        System.out.println("CONNECTED: " + session.getRemoteSocketAddress());
         this.session = session;
     }
 
-    @Override
+    @OnWebSocketClose
     public void onWebSocketClose(int statusCode, String reason) {
         this.session = null;
-        super.onWebSocketClose(statusCode, reason);
         System.out.println("CLOSE: " + statusCode + " " + reason);
     }
 
-    @Override
+    @OnWebSocketError
     public void onWebSocketError(Throwable cause) {
-        super.onWebSocketError(cause);
         System.out.println("ERROR: " + cause.toString());
     }
 
-    @Override
+    @OnWebSocketMessage
     public void onWebSocketText(String message) {
-        try {
-            super.onWebSocketText(message);
-            System.out.println("RECEIVED: " + message.length() + " characters");
-            if (session != null && session.isOpen()) {
-                session.getRemote().sendString("Text length is " + message.length());
-                session.getRemote().sendString("Text hash is " + message.hashCode());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println("RECEIVED: " + message.length() + " characters");
+        session.sendText("Text length is " + message.length(), Callback.NOOP);
+        session.sendText("Text hash is " + message.hashCode(), Callback.NOOP);
     }
 }
