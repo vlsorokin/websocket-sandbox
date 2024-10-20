@@ -22,11 +22,20 @@ public class Main {
         ServletHolder wsHolder = new ServletHolder("sandbox", new SandboxWebSocketServlet());
         context.addServlet(wsHolder, "/sandbox");
 
+        URL urlIndexHtml = Thread.currentThread().getContextClassLoader().getResource("default/index.html");
+        Objects.requireNonNull(urlIndexHtml, "Unable to find default/index.html in classpath");
+        String urlBase = urlIndexHtml.toExternalForm().replaceFirst("/[^/]*$", "/");
+        ServletHolder defHolder = new ServletHolder("default", new DefaultServlet());
+        defHolder.setInitParameter("resourceBase", urlBase);
+        defHolder.setInitParameter("dirAllowed", "true");
+        context.addServlet(defHolder, "/");
+
         server.start();
         server.dump(System.err);
 
         System.out.println();
         System.out.println("WebSocket server is running - ws://localhost:" + port + "/sandbox");
+        System.out.println("Open in browser to test - http://localhost:8080");
         server.join();
     }
 }
